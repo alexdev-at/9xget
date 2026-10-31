@@ -4,3 +4,7 @@
 
 > [!CAUTION]
 > This project just started and is **NOT** yet usable in any form. As soon as it is, more instructions will be added and this message will be removed.
+
+## License
+
+This project is licensed under the terms of the [GNU General Public License v3.0](LICENSE).
