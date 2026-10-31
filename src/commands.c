@@ -18,6 +18,7 @@ static command_status_t handle_help(int argc, char* argv[]) {
 
         for (int j = 0; j < MAX_COMMAND_ARRAY_SIZE; j++) {
             command_argument_t arg = cmd.arguments[j];
+            
             if (arg.name == NULL) break;
 
             if (j != 0) printf(",");
