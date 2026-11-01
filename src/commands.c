@@ -9,29 +9,25 @@ static command_status_t handle_help(int argc, char* argv[]) {
     printf("9xget - A Windows 95/98 package manager\n");
     printf("Commands:\n");
 
-    for (int i = 0; ; i++) {
-        command_t cmd = COMMANDS[i];
+    for (const command_t* cmd = COMMANDS; cmd->name != NULL; cmd++) {
+        printf("\t9xget %s", cmd->name);
 
-        if (cmd.name == NULL) break;
-
-        printf("\t9xget %s", cmd.name);
-
-        for (int j = 0; j < MAX_COMMAND_ARRAY_SIZE; j++) {
-            command_argument_t arg = cmd.arguments[j];
+        for (int i = 0; i < MAX_COMMAND_ARRAY_SIZE; i++) {
+            const command_argument_t* arg = &cmd->arguments[i];
             
-            if (arg.name == NULL) break;
+            if (arg->name == NULL) break;
 
-            if (j != 0) printf(",");
+            if (i != 0) printf(",");
 
-            if (arg.required) {
-                printf(" <%s>", arg.name);
+            if (arg->required) {
+                printf(" <%s>", arg->name);
             } else {
-                printf(" [%s]", arg.name);
+                printf(" [%s]", arg->name);
             }
         }
 
         printf("\n");
-        printf("\t\t %s\n", cmd.description);
+        printf("\t\t %s\n", cmd->description);
     }
 
     return SUCCESS;
@@ -62,21 +58,17 @@ static const command_t COMMANDS[] = {
 command_status_t process_command(int argc, char* argv[]) {
     if (argc < 2) return handle_help(argc, argv);
     
-    for (int i = 0; ; i++) {
-        command_t cmd = COMMANDS[i];
-
-        if (cmd.name == NULL) return ERROR_UNKNOWN_COMMAND;
-
-        if (strcmpi(cmd.name, argv[1]) == 0) {
-            return cmd.handler(argc, argv);
+    for (const command_t* cmd = COMMANDS; cmd->name != NULL; cmd++) {
+        if (strcmpi(cmd->name, argv[1]) == 0) {
+            return cmd->handler(argc, argv);
         } else {
-            for (int j = 0; j < MAX_COMMAND_ARRAY_SIZE; j++) {
-                const char* alias = cmd.aliases[j];
+            for (int i = 0; i < MAX_COMMAND_ARRAY_SIZE; i++) {
+                const char* alias = cmd->aliases[i];
 
                 if (alias == NULL) break;
 
                 if (strcmpi(alias, argv[1]) == 0) {
-                    return cmd.handler(argc, argv);
+                    return cmd->handler(argc, argv);
                 } 
             }
         }
