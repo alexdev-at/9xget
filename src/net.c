@@ -1,6 +1,7 @@
 #include "net.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <winsock.h>
 
@@ -38,38 +39,69 @@ bool net_download(const char* host, const char* path, const char* dest_path) {
         return false;
     }
 
-    char req[256];
-    sprintf(req, "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", path, host);
+    char req[2048];
+    snprintf(req, sizeof(req), "GET %s HTTP/1.0\r\nHost: %s\r\n\r\n", path, host);
     send(s, req, strlen(req), 0);
 
-    FILE* fp = fopen(dest_path, "wb");
-    if (fp == NULL) {
-        fprintf(stderr, "Error: Failed to open '%s' for writing\n", dest_path);
-        closesocket(s);
-        WSACleanup();
-        return false;
-    }
-
+    FILE* fp = NULL;
     char buf[4096];
     int n, header_done = 0;
 
-    while ((n = recv(s, buf, sizeof(buf), 0)) > 0) {
+    while ((n = recv(s, buf, sizeof(buf) - 1, 0)) > 0) {
+        buf[n] = '\0';
+
         if (!header_done) {
+            int status = 0;
+            char* space = strchr(buf, ' ');
+
+            if (n >= 12 && strncmp(buf, "HTTP/", 5) == 0 && space != NULL) {
+                status = atoi(space + 1);
+            }
+
+            if (status != 200) {
+                if (status == 404) {
+                    fprintf(stderr, "Error: HTTP 404 Not Found\n");
+                } else if (status == 301 || status == 302) {
+                    fprintf(stderr, "Error: Resource moved (HTTP %d redirect)\n", status);
+                } else {
+                    fprintf(stderr, "Error: Server returned HTTP %d\n", status);
+                }
+
+                closesocket(s);
+                WSACleanup();
+                return false;
+            }
+
             char* body = strstr(buf, "\r\n\r\n");
 
             if (body != NULL) {
                 header_done = 1;
                 body += 4;
-                fwrite(body, 1, n - (body - buf), fp);
+
+                fp = fopen(dest_path, "wb");
+                if (fp == NULL) {
+                    fprintf(stderr, "Error: Failed to open '%s' for writing\n", dest_path);
+                    closesocket(s);
+                    WSACleanup();
+                    return false;
+                }
+
+                int body_len = n - (body - buf);
+                if (body_len > 0) {
+                    fwrite(body, 1, body_len, fp);
+                }
             }
         } else {
             fwrite(buf, 1, n, fp);
         }
     }
 
-    fclose(fp);
+    if (fp != NULL) {
+        fclose(fp);
+    }
+
     closesocket(s);
     WSACleanup();
 
-    return true;
+    return header_done != 0;
 }
