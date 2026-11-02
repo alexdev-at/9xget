@@ -5,15 +5,7 @@
 
 #define MAX_COMMAND_ARRAY_SIZE 5
 
-typedef enum command_status {
-    SUCCESS,
-    ERROR_INVALID_ARGUMENTS,
-    ERROR_NO_INTERNET,
-    ERROR_UNKNOWN_COMMAND,
-    ERROR_UNKNOWN
-} command_status_t;
-
-typedef command_status_t (*command_handler_t)(int argc, char* argv[]);
+typedef bool (*command_handler_t)(int argc, char* argv[]);
 
 typedef struct command_argument {
     const char* name;
@@ -29,4 +21,4 @@ typedef struct command {
     const command_handler_t handler;
 } command_t;
 
-command_status_t process_command(int argc, char* argv[]);
+bool process_command(int argc, char* argv[]);

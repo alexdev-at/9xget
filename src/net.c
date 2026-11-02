@@ -4,14 +4,18 @@
 #include <string.h>
 #include <winsock.h>
 
-command_status_t net_download(const char* host, const char* path, const char* dest_path) {
+bool net_download(const char* host, const char* path, const char* dest_path) {
     WSADATA wsa;
-    if (WSAStartup(MAKEWORD(1, 1), &wsa) != 0) return ERROR_NO_INTERNET;
+    if (WSAStartup(MAKEWORD(1, 1), &wsa) != 0) {
+        fprintf(stderr, "Error: Failed to initialize network stack\n");
+        return false;
+    }
 
     struct hostent* he = gethostbyname(host);
     if (he == NULL || he->h_addr_list[0] == NULL) {
+        fprintf(stderr, "Error: Could not resolve host '%s'\n", host);
         WSACleanup();
-        return ERROR_NO_INTERNET;
+        return false;
     }
 
     struct sockaddr_in addr;
@@ -22,14 +26,16 @@ command_status_t net_download(const char* host, const char* path, const char* de
 
     SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
     if (s == INVALID_SOCKET) {
+        fprintf(stderr, "Error: Failed to create socket\n");
         WSACleanup();
-        return ERROR_NO_INTERNET;
+        return false;
     }
 
     if (connect(s, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
+        fprintf(stderr, "Error: Failed to connect to '%s'\n", host);
         closesocket(s);
         WSACleanup();
-        return ERROR_NO_INTERNET;
+        return false;
     }
 
     char req[256];
@@ -38,9 +44,10 @@ command_status_t net_download(const char* host, const char* path, const char* de
 
     FILE* fp = fopen(dest_path, "wb");
     if (fp == NULL) {
+        fprintf(stderr, "Error: Failed to open '%s' for writing\n", dest_path);
         closesocket(s);
         WSACleanup();
-        return ERROR_UNKNOWN;
+        return false;
     }
 
     char buf[4096];
@@ -64,6 +71,5 @@ command_status_t net_download(const char* host, const char* path, const char* de
     closesocket(s);
     WSACleanup();
 
-    return SUCCESS;
+    return true;
 }
-

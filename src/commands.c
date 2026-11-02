@@ -5,7 +5,7 @@
 
 static const command_t COMMANDS[];
 
-static command_status_t handle_help(int argc, char* argv[]) {
+static bool handle_help(int argc, char* argv[]) {
     printf("9xget - A Windows 95/98 package manager\n");
     printf("Commands:\n");
 
@@ -30,11 +30,11 @@ static command_status_t handle_help(int argc, char* argv[]) {
         printf("\t\t %s\n", cmd->description);
     }
 
-    return SUCCESS;
+    return true;
 }
 
-static command_status_t handle_update(int argc, char* argv[]) {
-    return SUCCESS;
+static bool handle_update(int argc, char* argv[]) {
+    return true;
 }
 
 static const command_t COMMANDS[] = {
@@ -55,7 +55,7 @@ static const command_t COMMANDS[] = {
     {NULL}
 };
 
-command_status_t process_command(int argc, char* argv[]) {
+bool process_command(int argc, char* argv[]) {
     if (argc < 2) return handle_help(argc, argv);
     
     for (const command_t* cmd = COMMANDS; cmd->name != NULL; cmd++) {
@@ -74,5 +74,6 @@ command_status_t process_command(int argc, char* argv[]) {
         }
     }
 
-    return ERROR_UNKNOWN;
+    fprintf(stderr, "Error: Unknown command '%s'\n", argv[1]);
+    return false;
 }

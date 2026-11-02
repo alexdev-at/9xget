@@ -1,5 +1,5 @@
 #pragma once
 
-#include "commands.h"
+#include <stdbool.h>
 
-command_status_t net_download(const char* host, const char* path, const char* dest_path);
+bool net_download(const char* host, const char* path, const char* dest_path);
