@@ -59,14 +59,7 @@ bool net_download(const char* host, const char* path, const char* dest_path) {
             }
 
             if (status != 200) {
-                if (status == 404) {
-                    fprintf(stderr, "Error: HTTP 404 Not Found\n");
-                } else if (status == 301 || status == 302) {
-                    fprintf(stderr, "Error: Resource moved (HTTP %d redirect)\n", status);
-                } else {
-                    fprintf(stderr, "Error: Server returned HTTP %d\n", status);
-                }
-
+                fprintf(stderr, "Error: Server returned HTTP %d\n", status);
                 closesocket(s);
                 WSACleanup();
                 return false;

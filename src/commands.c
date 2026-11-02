@@ -1,7 +1,12 @@
 #include "commands.h"
+#include "net.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <windows.h>
+
+#define PROXY_HOST "9xget.org-fpact.workers.dev"
+#define PACKAGES_HOST_PATH "/https://raw.githubusercontent.com/alexdev-at/9xget/main/packages/"
 
 static const command_t COMMANDS[];
 
@@ -34,6 +39,36 @@ static bool handle_help(int argc, char* argv[]) {
 }
 
 static bool handle_update(int argc, char* argv[]) {
+    char current_dir[2048];
+    char packages_dir[2048];
+    char destination_path[2048];
+    char remote_path[2048];
+
+    if (GetModuleFileNameA(NULL, current_dir, sizeof(current_dir)) == 0) {
+        fprintf(stderr, "Error: Could not locate 9xget executable path.\n");
+        return false;
+    }
+
+    char* last_slash = strrchr(current_dir, '\\');
+    if (last_slash != NULL) {
+        *last_slash = '\0';
+    }
+
+    snprintf(packages_dir, sizeof(packages_dir), "%s\\packages", current_dir);
+    CreateDirectoryA(packages_dir, NULL);
+
+    snprintf(destination_path, sizeof(destination_path), "%s\\index.ini", packages_dir);
+
+    snprintf(remote_path, sizeof(remote_path), "%sindex.ini", PACKAGES_HOST_PATH);
+
+    printf("Fetching package index...\n");
+
+    if (!net_download(PROXY_HOST, remote_path, destination_path)) {
+        fprintf(stderr, "Error: Failed to download index\n");
+        return false;
+    }
+
+    printf("Package index successfully updated.\n");
     return true;
 }
 
