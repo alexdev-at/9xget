@@ -40,9 +40,6 @@ static bool handle_help(int argc, char* argv[]) {
 
 static bool handle_update(int argc, char* argv[]) {
     char current_dir[2048];
-    char packages_dir[2048];
-    char destination_path[2048];
-    char remote_path[2048];
 
     if (GetModuleFileNameA(NULL, current_dir, sizeof(current_dir)) == 0) {
         fprintf(stderr, "Error: Could not locate 9xget executable path.\n");
@@ -54,11 +51,14 @@ static bool handle_update(int argc, char* argv[]) {
         *last_slash = '\0';
     }
 
+    char packages_dir[2048];
     snprintf(packages_dir, sizeof(packages_dir), "%s\\packages", current_dir);
     CreateDirectoryA(packages_dir, NULL);
 
+    char destination_path[2048];
     snprintf(destination_path, sizeof(destination_path), "%s\\index.ini", packages_dir);
 
+    char remote_path[2048];
     snprintf(remote_path, sizeof(remote_path), "%sindex.ini", PACKAGES_HOST_PATH);
 
     printf("Fetching package index...\n");
