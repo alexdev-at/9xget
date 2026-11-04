@@ -4,6 +4,11 @@
 #include <windows.h>
 
 bool run_system_check(void) {
+    #ifdef SKIP_SYSTEM_CHECK
+        printf("Skipping system check");
+        return true;
+    #else
+
     OSVERSIONINFO v;
     v.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&v);
@@ -14,4 +19,5 @@ bool run_system_check(void) {
     }
 
     return true;
+    #endif
 }

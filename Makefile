@@ -23,6 +23,10 @@ WATCOM = $(WATCOM_DEF)
 CC = wcl386
 CFLAGS = -bt=nt -zastd=c99 -zq -i="$(WATCOM)$(S)h" -i="$(WATCOM)$(S)h$(S)nt" -i=src -i=deps$(S)inih
 
+!ifdef SKIP_SYSTEM_CHECK
+CFLAGS += -dSKIP_SYSTEM_CHECK
+!endif
+
 all: bin$(S)9xget.exe .SYMBOLIC
 
 bin$(S)deps.marker:
