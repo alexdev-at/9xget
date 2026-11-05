@@ -12,16 +12,16 @@ bool run_system_check(void) {
 
     #ifndef SKIP_SYSTEM_CHECK
     if (v.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS || (v.dwMajorVersion == 4 && v.dwMinorVersion == 90)) {
-        fprintf(stderr, "Error: Windows version is not supported");
+        fprintf(stderr, "Error: Windows version is not supported\n");
         return false;
     }
     #else
-    printf("Skipping system check");
+    printf("Skipping system check\n");
     #endif
 
-    if (v.dwPlatformId != VER_PLATFORM_WIN32_WINDOWS) {
+    if (v.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
         if (v.dwMajorVersion == 4 && v.dwMinorVersion == 0) doctor_result.os_version = WINDOWS_95;
-        else if (v.dwMajorVersion == 4 && v.dwMinorVersion == 1) doctor_result.os_version = WINDOWS_98;
+        else if (v.dwMajorVersion == 4 && v.dwMinorVersion == 10) doctor_result.os_version = WINDOWS_98;
         else doctor_result.os_version = WINDOWS_UNKNOWN;
     } else {
         doctor_result.os_version = WINDOWS_UNKNOWN;

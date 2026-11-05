@@ -1,5 +1,6 @@
 #include "commands.h"
 #include "net.h"
+#include "paths.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -39,24 +40,11 @@ static bool handle_help(int argc, char* argv[]) {
 }
 
 static bool handle_update(int argc, char* argv[]) {
-    char current_dir[2048];
-
-    if (GetModuleFileNameA(NULL, current_dir, sizeof(current_dir)) == 0) {
-        fprintf(stderr, "Error: Could not locate 9xget executable path.\n");
+    char destination_path[MAX_PATH];
+    if (!path_get_index_path(destination_path, sizeof(destination_path))) {
+        fprintf(stderr, "Error: Could not determine index path.\n");
         return false;
     }
-
-    char* last_slash = strrchr(current_dir, '\\');
-    if (last_slash != NULL) {
-        *last_slash = '\0';
-    }
-
-    char packages_dir[2048];
-    snprintf(packages_dir, sizeof(packages_dir), "%s\\packages", current_dir);
-    CreateDirectoryA(packages_dir, NULL);
-
-    char destination_path[2048];
-    snprintf(destination_path, sizeof(destination_path), "%s\\index.ini", packages_dir);
 
     char remote_path[2048];
     snprintf(remote_path, sizeof(remote_path), "%sindex.ini", PACKAGES_HOST_PATH);
