@@ -9,4 +9,4 @@ typedef struct index_package {
     char win98[32];
 } index_package_t;
 
-bool find_index_package(index_package_t* out_index_package);
+bool find_index_package(char* package_name, index_package_t* out_index_package);
