@@ -5,11 +5,6 @@
 #include <windows.h>
 
 bool path_get_app_dir(char* out, size_t max_len) {
-    if (out == NULL || max_len == 0) {
-        fprintf(stderr, "Error: Invalid buffer passed to path_get_app_dir\n");
-        return false;
-    }
-
     if (GetModuleFileNameA(NULL, out, (DWORD)max_len) == 0) {
         fprintf(stderr, "Error: Could not locate 9xget executable path\n");
         return false;

@@ -3,6 +3,7 @@
 #include "paths.h"
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <string.h>
 #include <windows.h>
 
@@ -60,6 +61,11 @@ static bool handle_update(int argc, char* argv[]) {
     return true;
 }
 
+static bool handle_install(int argc, char* argv[]) {
+    fprintf(stderr, "Error: Not implemented yet\n");
+    return false;
+}
+
 static const command_t COMMANDS[] = {
     {
         "help",
@@ -75,25 +81,61 @@ static const command_t COMMANDS[] = {
         {NULL},
         handle_update
     },
+    {
+        "install",
+        {"i", NULL},
+        "Installs a package with the given id",
+        {
+            {
+                "id",
+                "The id of the package",
+                true
+            }
+        },
+        handle_install
+    },
     {NULL}
 };
+
+static bool check_command_args(const command_t* cmd, int argc) {
+    for (int i = 0; i < MAX_COMMAND_ARRAY_SIZE; i++) {
+        const command_argument_t* arg = &cmd->arguments[i];
+
+        if (arg->name == NULL) break;
+
+        if (arg->required && argc <= 2 + i) {
+            fprintf(stderr, "Error: Missing required argument '%s'\n", arg->name);
+            return false;
+        }
+    }
+
+    return true;
+}
 
 bool process_command(int argc, char* argv[]) {
     if (argc < 2) return handle_help(argc, argv);
     
     for (const command_t* cmd = COMMANDS; cmd->name != NULL; cmd++) {
-        if (strcmpi(cmd->name, argv[1]) == 0) {
-            return cmd->handler(argc, argv);
-        } else {
+        bool matches = (strcmpi(cmd->name, argv[1]) == 0);
+
+        if (!matches) {
             for (int i = 0; i < MAX_COMMAND_ARRAY_SIZE; i++) {
                 const char* alias = cmd->aliases[i];
 
                 if (alias == NULL) break;
 
                 if (strcmpi(alias, argv[1]) == 0) {
-                    return cmd->handler(argc, argv);
-                } 
+                    matches = true;
+                    break;
+                }
             }
+        }
+
+        if (matches) {
+            if (!check_command_args(cmd, argc)) {
+                return false;
+            }
+            return cmd->handler(argc, argv);
         }
     }
 
