@@ -32,7 +32,7 @@ bool net_download(const char* host, const char* path, const char* dest_path) {
         return false;
     }
 
-    if (connect(s, (struct sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
+    if (connect(s, (struct sockaddr*) &addr, sizeof(addr)) == SOCKET_ERROR) {
         fprintf(stderr, "Error: Failed to connect to '%s'\n", host);
         closesocket(s);
         WSACleanup();

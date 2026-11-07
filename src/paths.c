@@ -5,7 +5,7 @@
 #include <windows.h>
 
 bool path_get_app_dir(char* out, size_t max_len) {
-    if (GetModuleFileNameA(NULL, out, (DWORD)max_len) == 0) {
+    if (GetModuleFileNameA(NULL, out, max_len) == 0) {
         fprintf(stderr, "Error: Could not locate 9xget executable path\n");
         return false;
     }
